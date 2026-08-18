@@ -1,7 +1,6 @@
 name: Build Customised Caddy
 
 on:
-  # 仅允许手动触发流水线
   workflow_dispatch:
     inputs:
       caddy_version:
@@ -27,12 +26,10 @@ jobs:
         run: go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest
 
       - name: Compile customised Caddy binary
-        # 使用 xcaddy 编译指定版本并注入插件
         run: xcaddy build ${{ inputs.caddy_version }} --with ${{ inputs.caddy_plugin }}
 
       - name: Upload compiled artefact
-        # 注意：此处 action 名称为 upload-artifact，但显示名称已遵循英式英语规范 (Artefact)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: caddy-custom-linux-amd64
           path: caddy
