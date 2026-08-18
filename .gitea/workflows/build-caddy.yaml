@@ -1,0 +1,38 @@
+name: Build Customised Caddy
+
+on:
+  # 仅允许手动触发流水线
+  workflow_dispatch:
+    inputs:
+      caddy_version:
+        description: 'Specify Caddy version (e.g., latest, v2.8.4)'
+        required: true
+        default: 'latest'
+      caddy_plugin:
+        description: 'Specify plugin module path (e.g., github.com/caddy-dns/cloudflare)'
+        required: true
+        default: 'github.com/caddy-dns/cloudflare'
+
+jobs:
+  build-caddy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Initialise Go environment
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+          check-latest: true
+
+      - name: Install xcaddy programme
+        run: go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest
+
+      - name: Compile customised Caddy binary
+        # 使用 xcaddy 编译指定版本并注入插件
+        run: xcaddy build ${{ inputs.caddy_version }} --with ${{ inputs.caddy_plugin }}
+
+      - name: Upload compiled artefact
+        # 注意：此处 action 名称为 upload-artifact，但显示名称已遵循英式英语规范 (Artefact)
+        uses: actions/upload-artifact@v4
+        with:
+          name: caddy-custom-linux-amd64
+          path: caddy
