@@ -37,7 +37,7 @@ jobs:
           xcaddy build ${{ inputs.caddy_version }} $PLUGIN_ARGS
 
       - name: Upload compiled artefact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: caddy-custom-linux-amd64
           path: caddy
