@@ -41,6 +41,22 @@ The table below shows how the value of `caddy_plugin` maps to the actual `xcaddy
 
 > Empty entries are skipped automatically, so `plugin1, , plugin2` behaves the same as `plugin1, plugin2`.
 
+### Uploading to S3-compatible storage
+
+When the `S3_BUCKET` variable is set, the compiled binary is also uploaded to any S3-compatible object storage as `caddy-<version>-linux-amd64`. Leaving `S3_BUCKET` unset skips this step.
+
+Configure the repository settings (**Settings → Secrets and variables → Actions**):
+
+| Kind | Name | Description |
+|------|------|-------------|
+| Variable | `S3_ENDPOINT` | Endpoint of your S3-compatible service, e.g. `https://tos-s3-cn-hongkong.volces.com` (Volcano TOS), `https://s3.amazonaws.com`, or a MinIO/R2 endpoint |
+| Variable | `S3_REGION` | S3 region used for signing, e.g. `cn-hongkong`, `us-east-1` (defaults to `cn-hongkong` if unset) |
+| Variable | `S3_BUCKET` | Bucket to upload to. Leave unset to skip the upload |
+| Secret | `S3_ACCESS_KEY` | AccessKey ID |
+| Secret | `S3_SECRET_KEY` | AccessKey Secret |
+
+The upload uses the AWS CLI with the endpoint from `S3_ENDPOINT`, VirtualHostStyle addressing and SigV4 signing. The key needs write permission on the bucket. Note that a few providers (e.g. MinIO in path-style mode) require `path` addressing instead of `virtual` — edit the `aws configure set default.s3.addressing_style` line in the workflow accordingly.
+
 ## Building locally
 
 To reproduce the same build on your own machine you need Go 1.22+:
