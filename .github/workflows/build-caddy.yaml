@@ -8,9 +8,8 @@ on:
         required: true
         default: 'latest'
       caddy_plugin:
-        description: 'Specify plugin module path (e.g., github.com/caddy-dns/cloudflare)'
-        required: true
-        default: 'github.com/caddy-dns/cloudflare'
+        description: 'Comma-separated plugin module paths, e.g. github.com/caddy-dns/cloudflare, github.com/caddyserver/nginx-adapter. Leave empty to build vanilla Caddy.'
+        required: false
 
 jobs:
   build-caddy:
@@ -26,7 +25,16 @@ jobs:
         run: go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest
 
       - name: Compile customised Caddy binary
-        run: xcaddy build ${{ inputs.caddy_version }} --with ${{ inputs.caddy_plugin }}
+        run: |
+          PLUGIN_ARGS=""
+          IFS=',' read -ra PLUGINS <<< "${{ inputs.caddy_plugin }}"
+          for PLUGIN in "${PLUGINS[@]}"; do
+            PLUGIN="${PLUGIN// /}"
+            if [ -n "$PLUGIN" ]; then
+              PLUGIN_ARGS="$PLUGIN_ARGS --with $PLUGIN"
+            fi
+          done
+          xcaddy build ${{ inputs.caddy_version }} $PLUGIN_ARGS
 
       - name: Upload compiled artefact
         uses: actions/upload-artifact@v3
