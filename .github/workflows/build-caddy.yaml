@@ -41,3 +41,15 @@ jobs:
         with:
           name: caddy-custom-linux-amd64
           path: caddy
+
+      - name: Upload binary to S3
+        if: ${{ vars.S3_BUCKET != '' }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.S3_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_KEY }}
+          AWS_DEFAULT_REGION: ${{ vars.S3_REGION || 'cn-hongkong' }}
+        run: |
+          aws configure set default.s3.addressing_style virtual
+          aws s3 cp caddy "s3://${{ vars.S3_BUCKET }}/caddy-${{ inputs.caddy_version }}-linux-amd64" \
+            --endpoint-url "${{ vars.S3_ENDPOINT }}" \
+            --no-progress
